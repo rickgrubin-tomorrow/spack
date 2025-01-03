@@ -2,6 +2,7 @@
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
+import os
 
 from spack.build_systems.autotools import AutotoolsBuilder
 from spack.build_systems.cmake import CMakeBuilder
@@ -22,7 +23,15 @@ class Freetype(AutotoolsPackage, CMakePackage):
 
     license("FTL OR GPL-2.0-or-later")
 
-    version("2.13.2", sha256="1ac27e16c134a7f2ccea177faba19801131116fd682efc1f5737037c5db224b5")
+    version("2.13.3", sha256="5c3a8e78f7b24c20b25b54ee575d6daa40007a5f4eea2845861c3409b3021747")
+    # Freetype 2.13.3 broke the public interface, so marking 2.13.2 as preferred in spack 0.23
+    # Once spack 0.23 has been released, this preference can be removed again.
+    # https://gitlab.freedesktop.org/freetype/freetype/-/merge_requests/330
+    version(
+        "2.13.2",
+        sha256="1ac27e16c134a7f2ccea177faba19801131116fd682efc1f5737037c5db224b5",
+        preferred=True,
+    )
     version("2.13.1", sha256="0b109c59914f25b4411a8de2a506fdd18fa8457eb86eca6c7b15c19110a92fa5")
     version("2.13.0", sha256="a7aca0e532a276ea8d85bd31149f0a74c33d19c8d287116ef8f5f8357b4f1f80")
     version("2.12.1", sha256="efe71fd4b8246f1b0b1b9bfca13cfff1c9ad85930340c27df469733bbb620938")
@@ -39,12 +48,15 @@ class Freetype(AutotoolsPackage, CMakePackage):
     version("2.6.1", sha256="0a3c7dfbda6da1e8fce29232e8e96d987ababbbf71ebc8c75659e4132c367014")
     version("2.5.3", sha256="41217f800d3f40d78ef4eb99d6a35fd85235b64f81bc56e4812d7672fca7b806")
 
+    depends_on("c", type="build")  # generated
+
     # CMake build does not install freetype-config, which is needed by most packages
     build_system("cmake", "autotools", default="autotools")
 
     depends_on("bzip2")
     depends_on("libpng")
-    for plat in ["linux", "darwin", "cray"]:
+    depends_on("zlib-api")
+    for plat in ["linux", "darwin"]:
         depends_on("pkgconfig", type="build", when="platform=%s" % plat)
 
     conflicts(
@@ -85,7 +97,7 @@ class AutotoolsBuilder(AutotoolsBuilder):
             "--with-bzip2=yes",
             "--with-harfbuzz=no",
             "--with-png=yes",
-            "--with-zlib=no",
+            "--with-zlib=yes",
         ]
         if self.spec.satisfies("@2.9.1:"):
             args.append("--enable-freetype-config")
@@ -96,6 +108,11 @@ class AutotoolsBuilder(AutotoolsBuilder):
     def setup_build_environment(self, env):
         if self.spec.satisfies("+pic"):
             env.set("CFLAGS", "-fPIC")
+        if self.spec["zlib-api"].external:
+            env.append_path(
+                "PKG_CONFIG_PATH",
+                os.path.dirname(find_first(self.spec["zlib-api"].prefix, "zlib.pc", bfs_depth=10)),
+            )
 
 
 class CMakeBuilder(CMakeBuilder):
