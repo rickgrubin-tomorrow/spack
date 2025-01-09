@@ -28,6 +28,8 @@ class Glibc(AutotoolsPackage, GNUMirrorPackage):
 
     license("LGPL-2.1-or-later")
 
+    requires("%gcc")
+
     provides("libc")
     provides("iconv")
 
