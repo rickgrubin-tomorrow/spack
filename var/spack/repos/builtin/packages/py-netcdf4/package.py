@@ -59,6 +59,7 @@ class PyNetcdf4(PythonPackage):
     # overrides the auto-decect feature (has_parallel_support) in setup.py. The
     # logic in setup.py changed between 1.6.5 and 1.7.1, therefore this patch
     # only works for versions 1.7.1 and later.
+    # https://github.com/Unidata/netcdf4-python/issues/1389
     patch("nompi.patch", when="@1.7.1: ~mpi")
 
     # https://github.com/Unidata/netcdf4-python/pull/1322
