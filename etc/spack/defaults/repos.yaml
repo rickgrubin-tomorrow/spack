@@ -13,5 +13,6 @@
 repos:
   - /backup/rgrubin/git/spack-stack/spack-ext/repos/NWP-DA-bundles
   - /backup/rgrubin/git/spack-stack/spack-ext/repos/NWP-DA
+  - /backup/rgrubin/git/spack-stack/spack-ext/repos/CBAM
   - /backup/rgrubin/git/spack-stack/spack-ext/repos/spack-stack
   - $spack/var/spack/repos/builtin
