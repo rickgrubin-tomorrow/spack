@@ -157,7 +157,7 @@ class NetcdfFortran(AutotoolsPackage):
 
         return config_args
 
-    @run_after("install")
+    @on_package_attributes(run_tests=True)
     def check(self):
         make("check", parallel=self.spec.satisfies("@4.5:"))
 
