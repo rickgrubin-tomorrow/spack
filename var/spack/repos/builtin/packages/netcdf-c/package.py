@@ -561,8 +561,11 @@ class AutotoolsBuilder(BaseBuilder, autotools.AutotoolsBuilder):
 
     # It looks like the issues with running the tests in parallel were fixed around version 4.6.0
     # (see https://github.com/Unidata/netcdf-c/commit/812c2fd4d108cca927582c0d84049c0f271bb9e0):
-    @when("@:4.5.0")
-    @on_package_attributes(run_tests=True)
-    def check(self):
+    @run_after("install")
+    def run_checks(self):
         # h5_test fails when run in parallel
-        make("check", parallel=False)
+        if self.pkg.run_tests:
+            make("check", parallel=self.spec.satisfies("@4.6:"))
+
+    def check(self):
+        pass

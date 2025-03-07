@@ -157,9 +157,13 @@ class NetcdfFortran(AutotoolsPackage):
 
         return config_args
 
+    @run_after("install")
     @on_package_attributes(run_tests=True)
-    def check(self):
+    def run_checks(self):
         make("check", parallel=self.spec.satisfies("@4.5:"))
+
+    def check(self):
+        pass
 
     @run_after("install")
     def cray_module_filenames(self):
