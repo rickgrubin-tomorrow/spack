@@ -3,6 +3,9 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+import glob
+import os
+
 from spack.package import *
 
 
@@ -103,3 +106,10 @@ class Crtm(CMakePackage):
                 )
         if not self.run_tests:
             filter_file(r"add_subdirectory\(test\)", "# disable testing", "CMakeLists.txt")
+
+    @when("@3.1.1-build1")
+    @run_after("install")
+    def cmake_config_softlinks(self):
+        cmake_config_files = glob.glob(join_path(self.prefix, "cmake/crtm/*"))
+        for srcpath in cmake_config_files:
+            os.symlink(srcpath, join_path(self.prefix, "cmake", os.path.basename(srcpath)))
