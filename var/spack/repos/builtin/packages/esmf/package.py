@@ -495,6 +495,3 @@ class MakefileBuilder(spack.build_systems.makefile.MakefileBuilder):
             # build the python library
             python_builder = PythonPipBuilder(pkg)
             python_builder.install(pkg, spec, prefix)
-
-        if spec.satisfies("@8.9:"):
-            install_tree("cmake", self.prefix.cmake)
