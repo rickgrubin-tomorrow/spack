@@ -1,5 +1,4 @@
-# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
@@ -13,8 +12,8 @@ class Metplus(Package):
     """
 
     homepage = "https://dtcenter.org/community-code/metplus"
-    git = "https://github.com/dtcenter/METplus"
     url = "https://github.com/dtcenter/METplus/archive/refs/tags/v4.1.0.tar.gz"
+    git = "https://github.com/dtcenter/METplus"
 
     maintainers("AlexanderRichert-NOAA", "climbfuji")
 
@@ -36,18 +35,18 @@ class Metplus(Package):
     variant("plotdataplane", default=False, description="Generate images from Postscript output.")
 
     depends_on("python@3.10.4:", when="@6:", type=("run"))
-    depends_on("met@12:+python", when="@6:", type=("run"))
     depends_on("met+python", type=("run"))
+    depends_on("met@12:+python", when="@6:", type=("run"))
     # https://metplus.readthedocs.io/en/main_v6.0/Users_Guide/installation.html
-    depends_on("netcdf-c@1.5.4:", when="@6:")
     depends_on("netcdf-c")
-    depends_on("py-python-dateutil@2.8:", when="@6:", type=("run"))
+    depends_on("netcdf-c@1.5.4:", when="@6:")
     depends_on("py-python-dateutil", type=("run"))
+    depends_on("py-python-dateutil@2.8:", when="@6:", type=("run"))
 
-    depends_on("py-cartopy@0.20.3:", when="@6: +makeplots", type=("run"))
     depends_on("py-cartopy", when="+makeplots", type=("run"))
-    depends_on("py-matplotlib@3.5.2", when="@6: +cycloneplotter", type=("run"))
+    depends_on("py-cartopy@0.20.3:", when="@6: +makeplots", type=("run"))
     depends_on("py-matplotlib", when="+cycloneplotter", type=("run"))
+    depends_on("py-matplotlib@3.5.2", when="@6: +cycloneplotter", type=("run"))
     depends_on("py-cartopy", when="+cycloneplotter", type=("run"))
 
     depends_on("r", when="+tcmpr_plotter", type=("run"))

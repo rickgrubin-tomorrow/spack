@@ -1,15 +1,11 @@
-# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 import os
 
-import llnl.util.tty as tty
-
 from spack.package import *
 from spack.util.environment import set_env
-from spack.util.executable import ProcessError
 
 
 class Strumpack(CMakePackage, CudaPackage, ROCmPackage):
@@ -160,7 +156,7 @@ class Strumpack(CMakePackage, CudaPackage, ROCmPackage):
             args.extend([self.define_from_variant("STRUMPACK_C_INTERFACE", "c_interface")])
 
         # Workaround for linking issue on Mac:
-        if spec.satisfies("%apple-clang +mpi"):
+        if spec.satisfies("+mpi %apple-clang"):
             args.append("-DCMAKE_Fortran_COMPILER=%s" % spec["mpi"].mpifc)
 
         if "+cuda" in spec:
@@ -226,7 +222,7 @@ class Strumpack(CMakePackage, CudaPackage, ROCmPackage):
             )
 
         with working_dir(test_dir):
-            opts = self.builder.std_cmake_args + self.cmake_args() + ["."]
+            opts = self.std_cmake_args + self.cmake_args() + ["."]
             cmake = self.spec["cmake"].command
             cmake(*opts)
 

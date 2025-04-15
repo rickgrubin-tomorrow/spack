@@ -1,5 +1,4 @@
-# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
@@ -14,8 +13,8 @@ class Met(AutotoolsPackage):
     configurable methods to compute statistics and diagnostics"""
 
     homepage = "https://dtcenter.org/community-code/model-evaluation-tools-met"
-    git = "https://github.com/dtcenter/MET"
     url = "https://github.com/dtcenter/MET/archive/refs/tags/v11.0.1.tar.gz"
+    git = "https://github.com/dtcenter/MET"
 
     maintainers("AlexanderRichert-NOAA", "climbfuji")
 
@@ -45,7 +44,7 @@ class Met(AutotoolsPackage):
 
     depends_on("gsl")
     depends_on("bufr")
-    depends_on("proj", when="@12")
+    depends_on("proj", when="@12:")
     depends_on("zlib-api")
     depends_on("netcdf-c")
     depends_on("netcdf-cxx4")
@@ -59,7 +58,7 @@ class Met(AutotoolsPackage):
     depends_on("cairo", when="+graphics")
     depends_on("freetype", when="+graphics")
 
-    depends_on("python@3.6.3:", when="+python")
+    depends_on("python@3.6.3:", when="+python", type=("build", "run"))
     depends_on("py-netcdf4", when="+python", type=("build", "run"))
     depends_on("py-numpy", when="+python", type=("build", "run"))
     depends_on("py-xarray", when="+python", type=("build", "run"))
