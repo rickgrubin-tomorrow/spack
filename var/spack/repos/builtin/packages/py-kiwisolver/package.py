@@ -35,4 +35,4 @@ class PyKiwisolver(PythonPackage):
 
     # https://github.com/spack/spack/issues/28522
     # https://github.com/nucleic/kiwi/issues/126
-    patch("macos-gcc.patch", when="@:1.3.2 %gcc platform=darwin")
+    patch("macos-gcc.patch", when="@:1.3.2 platform=darwin %gcc")
