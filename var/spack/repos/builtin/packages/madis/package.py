@@ -4,6 +4,7 @@
 
 import os
 
+import spack.compiler
 from spack.package import *
 
 

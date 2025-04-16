@@ -6,6 +6,7 @@ import platform
 import subprocess
 from typing import Tuple
 
+import spack.compiler
 from spack.package import *
 
 
