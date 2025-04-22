@@ -108,11 +108,14 @@ class ParallelNetcdf(AutotoolsPackage):
             autoreconf("-iv")
 
     def configure_args(self):
-        if self.spec["mpi"].satisfies("intel-oneapi-mpi"):
+        if self.spec["mpi"].satisfies("cray-mpich ~wrappers"):
+            args = ["MPICC=%s" % spack_cc, "SEQ_CC=%s" % spack_cc]
+        elif self.spec["mpi"].satisfies("intel-oneapi-mpi"):
             prefix = os.path.join(self.spec["mpi"].prefix, "mpi", str(self.spec["mpi"].version))
+            args = ["--with-mpi=%s" % prefix, "SEQ_CC=%s" % spack_cc]
         else:
             prefix = self.spec["mpi"].prefix
-        args = ["--with-mpi=%s" % prefix, "SEQ_CC=%s" % spack_cc]
+            args = ["--with-mpi=%s" % prefix, "SEQ_CC=%s" % spack_cc]
 
         args += self.enable_or_disable("cxx")
         args += self.enable_or_disable("fortran")
