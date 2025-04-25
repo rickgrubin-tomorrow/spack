@@ -1,12 +1,15 @@
-# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 import os
+import sys
 import tempfile
 
+from spack.build_systems.cmake import CMakeBuilder
 from spack.package import *
+
+IS_WINDOWS = sys.platform == "win32"
 
 
 class Adios2(CMakePackage, CudaPackage, ROCmPackage):
@@ -77,7 +80,7 @@ class Adios2(CMakePackage, CudaPackage, ROCmPackage):
     variant("zfp", default=True, description="Enable ZFP compression")
     variant("png", default=True, when="@2.4:", description="Enable PNG compression")
     variant("sz", default=True, when="@2.6:", description="Enable SZ compression")
-    variant("mgard", default=True, when="@2.8:", description="Enable MGARD compression")
+    variant("mgard", default=not IS_WINDOWS, when="@2.8:", description="Enable MGARD compression")
 
     # Rransport engines
     variant("sst", default=True, description="Enable the SST staging engine")
@@ -99,7 +102,7 @@ class Adios2(CMakePackage, CudaPackage, ROCmPackage):
     )
     variant(
         "libcatalyst",
-        default=True,
+        default=not IS_WINDOWS,
         when="@2.9:",
         description="Enable support for in situ visualization plugin using ParaView Catalyst",
     )
@@ -113,7 +116,6 @@ class Adios2(CMakePackage, CudaPackage, ROCmPackage):
     # Requires mature C++11 implementations
     conflicts("%gcc@:4.7")
     conflicts("%intel@:15")
-    conflicts("%pgi@:14")
 
     # ifx does not support submodules in separate files
     conflicts("%oneapi@:2022.1.0", when="+fortran")
@@ -192,10 +194,14 @@ class Adios2(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("mgard@2023-01-10:", when="@2.9: +mgard")
 
     extends("python", when="+python")
-    depends_on("python@2.7:2.8,3.5:", when="@:2.4.0 +python", type=("build", "run"))
-    depends_on("python@2.7:2.8,3.5:", when="@:2.4.0", type="test")
-    depends_on("python@3.5:", when="@2.5.0: +python", type=("build", "run"))
-    depends_on("python@3.5:", when="@2.5.0:", type="test")
+    depends_on("python", when="+python", type=("build", "run"))
+    depends_on("python@2.7:2.8,3.5:3.10", when="@:2.4.0 +python", type=("build", "run"))
+    depends_on("python@3.5:3.10", when="@2.5.0:2.7 +python", type=("build", "run"))
+
+    depends_on("python", type="test")
+    depends_on("python@2.7:2.8,3.5:3.10", when="@:2.4.0", type="test")
+    depends_on("python@3.5:3.10", when="@2.5.0:2.7", type="test")
+
     depends_on("py-numpy@1.6.1:", when="+python", type=("build", "run"))
     depends_on("py-mpi4py@2.0.0:", when="+mpi +python", type=("build", "run"))
     depends_on("aws-sdk-cpp", when="+aws")
@@ -254,9 +260,9 @@ class Adios2(CMakePackage, CudaPackage, ROCmPackage):
 
     def setup_build_environment(self, env):
         # https://github.com/ornladios/ADIOS2/issues/2228
-        if self.spec.satisfies("%gcc@10: +fortran"):
+        if self.spec.satisfies("+fortran %gcc@10:"):
             env.set("FFLAGS", "-fallow-argument-mismatch")
-        elif self.spec.satisfies("%fj +fortran"):
+        elif self.spec.satisfies("+fortran %fj"):
             env.set("FFLAGS", "-Ccpp")
 
     def cmake_args(self):
@@ -314,11 +320,11 @@ class Adios2(CMakePackage, CudaPackage, ROCmPackage):
 
         # hip support
         if spec.satisfies("+cuda"):
-            args.append(self.builder.define_cuda_architectures(self))
+            args.append(CMakeBuilder.define_cuda_architectures(self))
 
         # hip support
         if spec.satisfies("+rocm"):
-            args.append(self.builder.define_hip_architectures(self))
+            args.append(CMakeBuilder.define_hip_architectures(self))
 
         return args
 
@@ -392,6 +398,7 @@ class Adios2(CMakePackage, CudaPackage, ROCmPackage):
         # Create the build tree within this spec's test stage dir so it gets
         # cleaned up automatically
         build_dir = tempfile.mkdtemp(dir=test_stage_dir)
+        cmake = Executable(spec["cmake"].prefix.bin.cmake)
 
         std_cmake_args = []
 
@@ -406,7 +413,7 @@ class Adios2(CMakePackage, CudaPackage, ROCmPackage):
                 self, "test_examples_build", purpose="build example against installed adios2"
             ):
                 cmake(src_dir, *std_cmake_args)
-                make()
+                cmake(*(["--build", "."]))
 
             for p in built_programs:
                 exe = which(join_path(".", p))

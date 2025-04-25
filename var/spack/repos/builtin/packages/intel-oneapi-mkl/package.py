@@ -1,5 +1,4 @@
-# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
@@ -25,6 +24,18 @@ class IntelOneapiMkl(IntelOneApiLibraryPackage):
         "https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl.html"
     )
 
+    version(
+        "2025.1.0",
+        url="https://registrationcenter-download.intel.com/akdlm/IRC_NAS/dc93af13-2b3f-40c3-a41b-2bc05a707a80/intel-onemkl-2025.1.0.803_offline.sh",
+        sha256="80a4b1338b48b3fbee55a8dc784f92e5e88d618f1b99d80f5f207a00c86a6638",
+        expand=False,
+    )
+    version(
+        "2025.0.1",
+        url="https://registrationcenter-download.intel.com/akdlm/IRC_NAS/246ea40e-5aa7-42a4-81fa-0c029dc8650f/intel-onemkl-2025.0.1.16_offline.sh",
+        sha256="bd86677aa17499c89ca7a3c3c83b73f0644147e4f1d2a218b45a7349cf582f4a",
+        expand=False,
+    )
     version(
         "2025.0.0",
         url="https://registrationcenter-download.intel.com/akdlm/IRC_NAS/79153e0f-74d7-45af-b8c2-258941adf58a/intel-onemkl-2025.0.0.940_offline.sh",
@@ -284,7 +295,7 @@ class IntelOneapiMkl(IntelOneApiLibraryPackage):
         try:
             if self.spec.satisfies("+cluster ^mpi"):
                 resolved_libs = resolved_libs + self.spec["mpi"].libs
-        except spack.error.NoLibrariesError:
+        except NoLibrariesError:
             pass
 
         if self.spec.satisfies("threads=openmp"):

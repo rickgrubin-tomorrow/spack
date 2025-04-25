@@ -1,5 +1,4 @@
-# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
@@ -16,6 +15,7 @@ class PyNetcdf4(PythonPackage):
 
     license("MIT")
 
+    version("1.7.2", sha256="a4c6375540b19989896136943abb6d44850ff6f1fa7d3f063253b1ad3f8b7fce")
     version(
         "1.7.1.post2", sha256="37d557e36654889d7020192bfb56f9d5f93894cb32997eb837ae586c538fd7b6"
     )
@@ -28,6 +28,7 @@ class PyNetcdf4(PythonPackage):
     variant("mpi", default=True, description="Parallel IO support")
 
     depends_on("python", type=("build", "link", "run"))
+    depends_on("python@3.8:", when="@1.7.1:", type=("build", "link", "run"))
     depends_on("py-cython@0.29:", when="@1.6.5:", type="build")
     depends_on("py-cython@0.19:", type="build")
     depends_on("py-setuptools@61:", when="@1.6.5:", type="build")
@@ -36,16 +37,27 @@ class PyNetcdf4(PythonPackage):
     depends_on("py-setuptools-scm@3.4:+toml", when="@1.7:", type="build")
     depends_on("py-cftime", type=("build", "run"))
     depends_on("py-certifi", when="@1.6.5:", type=("build", "run"))
-    depends_on("py-numpy", when="@1.6.5:", type=("build", "link", "run"))
+    depends_on("py-numpy", type=("build", "link", "run"))
+    # DH* 20250416 WORKAROUND BECAUSE WE USED numpy@1.26 SO FAR WITHOUT
+    # ISSUES AND WE CANNOT SWITCH TO NUMPY@2 YET
+    # depends_on("py-numpy@2.0:", when="@1.7.1:", type=("build", "link", "run"))
+    depends_on("py-numpy@1.26:", when="@1.7.1:", type=("build", "link", "run"))
+    # *DH 20250416
     depends_on("py-numpy@1.9:", when="@1.5.4:1.6.2", type=("build", "link", "run"))
-    depends_on("py-numpy@1.7:", type=("build", "link", "run"))
     # https://github.com/Unidata/netcdf4-python/pull/1317
     depends_on("py-numpy@:1", when="@:1.6", type=("build", "link", "run"))
     depends_on("py-mpi4py", when="+mpi", type=("build", "run"))
-    depends_on("netcdf-c", when="~mpi")
-    depends_on("netcdf-c+mpi", when="+mpi")
-    depends_on("hdf5@1.8.0:+hl", when="~mpi")
-    depends_on("hdf5@1.8.0:+hl+mpi", when="+mpi")
+
+    depends_on("netcdf-c")
+    depends_on("hdf5")
+    with when("@:1.6~mpi"):
+        # These forced variant requests are due to py-netcdf4 build scripts
+        # https://github.com/spack/spack/pull/47824#discussion_r1882473998
+        depends_on("netcdf-c~mpi")
+        depends_on("hdf5~mpi")
+    with when("+mpi"):
+        depends_on("netcdf-c+mpi")
+        depends_on("hdf5+mpi")
 
     # The installation script tries to find hdf5 using pkg-config. However, the
     # version of hdf5 installed with Spack does not have pkg-config files.
@@ -56,15 +68,18 @@ class PyNetcdf4(PythonPackage):
 
     # Allow building py-netcdf4 ~mpi when netCDF was build with +mpi. This patch
     # overrides the auto-decect feature (has_parallel_support) in setup.py. The
-    # logic in setup.py changed between 1.6.5 and 1.7.1, therefore this patch
-    # only works for versions 1.7.1 and later.
-    patch("nompi.patch", when="@1.7.1: ~mpi")
+    # logic in setup.py changed between 1.6 and 1.7, therefore this patch only
+    # works for versions 1.7.0 and later.
+    # See also: https://github.com/Unidata/netcdf4-python/issues/1389
+    with when("@1.7:~mpi"):
+        patch("disable_parallel_support.patch", when="^netcdf-c+mpi")
+        patch("disable_parallel_support.patch", when="^hdf5+mpi")
 
     # https://github.com/Unidata/netcdf4-python/pull/1322
     patch(
         "https://github.com/Unidata/netcdf4-python/commit/49dcd0b5bd25824c254770c0d41445133fc13a46.patch?full_index=1",
         sha256="71eefe1d3065ad050fb72eb61d916ae1374a3fafd96ddaee6499cda952d992c4",
-        when="@1.6: %gcc@14:",
+        when="@1.6:1.6.5 %gcc@14:",
     )
 
     def url_for_version(self, version):

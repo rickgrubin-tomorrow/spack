@@ -1,5 +1,4 @@
-.. Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-   Spack Project Developers. See the top-level COPYRIGHT file for details.
+.. Copyright Spack Project Developers. See COPYRIGHT file for details.
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
@@ -172,7 +171,6 @@ bootstrapping.
      % spack bootstrap add --trust local-sources /opt/bootstrap/metadata/sources
      % spack bootstrap add --trust local-binaries /opt/bootstrap/metadata/binaries
      % spack buildcache update-index /opt/bootstrap/bootstrap_cache
-
 
 This command needs to be run on a machine with internet access and the resulting folder
 has to be moved over to the air-gapped system. Once the local sources are added using the
