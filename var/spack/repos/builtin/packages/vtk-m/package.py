@@ -1,5 +1,4 @@
-# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
@@ -7,6 +6,7 @@
 import os
 import sys
 
+from spack.build_systems.cmake import CMakeBuilder
 from spack.package import *
 
 
@@ -52,7 +52,8 @@ class VtkM(CMakePackage, CudaPackage, ROCmPackage):
     version("1.2.0", sha256="44596e88b844e7626248fb8e96a38be25a0e585a22256b1c859208b23ef45171")
     version("1.1.0", sha256="55f42c417d3a41893230b2fd3b5c192daeee689a2193de10bf22a1ef5c24c7ad")
 
-    depends_on("cxx", type="build")  # generated
+    depends_on("c", type="build")
+    depends_on("cxx", type="build")
 
     variant("shared", default=False, description="build shared libs")
 
@@ -237,7 +238,7 @@ class VtkM(CMakePackage, CudaPackage, ROCmPackage):
                 os.environ["TBB_ROOT"] = spec["tbb"].prefix
 
             if "+kokkos" in spec and "+rocm" in spec and spec.satisfies("^kokkos@4:"):
-                options.append(f"-DCMAKE_CXX_COMPILER:BOOL={spec['hip'].prefix.bin.hipcc}")
+                options.append(f"-DCMAKE_CXX_COMPILER:FILEPATH={spec['hip'].prefix.bin.hipcc}")
 
             # Support for relocatable code
             if "~shared" in spec and "+fpic" in spec:
@@ -249,7 +250,7 @@ class VtkM(CMakePackage, CudaPackage, ROCmPackage):
                 options.append("-DCMAKE_CUDA_HOST_COMPILER={0}".format(env["SPACK_CXX"]))
 
                 if spec.satisfies("@1.9.0:") and spec.satisfies("^cmake@3.18:"):
-                    options.append(self.builder.define_cuda_architectures(self))
+                    options.append(CMakeBuilder.define_cuda_architectures(self))
 
                 else:
                     # VTKm_CUDA_Architecture only accepts a single CUDA arch
@@ -269,26 +270,22 @@ class VtkM(CMakePackage, CudaPackage, ROCmPackage):
 
             # hip support
             if "+rocm" in spec:
-                options.append(self.builder.define_hip_architectures(self))
+                options.append(CMakeBuilder.define_hip_architectures(self))
 
         return options
 
     def test_smoke_test(self):
         """Build and run ctests"""
-        spec = self.spec
-
-        if "+examples" not in spec:
+        if "+examples" not in self.spec:
             raise SkipTest("Package must be installed with +examples")
 
         testdir = "smoke_test_build"
         with working_dir(testdir, create=True):
-            cmake = Executable(spec["cmake"].prefix.bin.cmake)
-            ctest = Executable(spec["cmake"].prefix.bin.ctest)
-            cmakeExampleDir = spec["vtk-m"].prefix.share.doc.VTKm.examples.smoke_test
-
-            cmake(*([cmakeExampleDir, "-DVTKm_ROOT=" + spec["vtk-m"].prefix]))
-            cmake(*(["--build", "."]))
-            ctest(*(["--verbose"]))
+            cmake = Executable(self.spec["cmake"].prefix.bin.cmake)
+            ctest = Executable(self.spec["cmake"].prefix.bin.ctest)
+            cmake(self.prefix.share.doc.VTKm.examples.smoke_test, f"-DVTKm_ROOT={self.prefix}")
+            cmake("--build", ".")
+            ctest("--verbose")
 
     @run_after("install")
     @on_package_attributes(run_tests=True)

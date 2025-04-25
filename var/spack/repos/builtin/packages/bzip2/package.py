@@ -1,5 +1,4 @@
-# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
@@ -84,7 +83,7 @@ class Bzip2(Package, SourcewarePackage):
         filter_file(r"^CC=gcc", "CC={0}".format(spack_cc), "Makefile-libbz2_so")
 
         # The Makefiles use GCC flags that are incompatible with PGI
-        if self.spec.satisfies("%pgi") or self.spec.satisfies("%nvhpc@:20.11"):
+        if self.spec.satisfies("%nvhpc@:20.11"):
             filter_file("-Wall -Winline", "-Minform=inform", "Makefile")
             filter_file("-Wall -Winline", "-Minform=inform", "Makefile-libbz2_so")
 
@@ -171,7 +170,7 @@ class Bzip2(Package, SourcewarePackage):
     @run_after("install")
     def install_pkgconfig(self):
         # Add pkgconfig file after installation
-        libdir = self.spec["bzip2"].libs.directories[0]
+        libdir = self.libs.directories[0]
         pkg_path = join_path(self.prefix.lib, "pkgconfig")
         mkdirp(pkg_path)
 

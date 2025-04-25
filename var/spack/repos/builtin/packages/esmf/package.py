@@ -1,11 +1,13 @@
-# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 import os
 import sys
 
+import spack.build_systems.makefile
+import spack.build_systems.python
+import spack.compiler
 from spack.build_environment import dso_suffix, stat_suffix
 from spack.package import *
 
@@ -198,11 +200,11 @@ class MakefileBuilder(spack.build_systems.makefile.MakefileBuilder):
     filter_compiler_wrappers("esmf.mk", relative_root="lib")
 
     # Make script from mvapich2.patch executable
+    @when("@:7.0")
     @run_before("build")
     def chmod_scripts(self):
-        if self.spec.satisfies("@:7.0"):
-            chmod = which("chmod")
-            chmod("+x", "scripts/libs.mvapich2f90")
+        chmod = which("chmod")
+        chmod("+x", "scripts/libs.mvapich2f90")
 
     def url_for_version(self, version):
         if version < Version("8.0.0"):
@@ -289,8 +291,6 @@ class MakefileBuilder(spack.build_systems.makefile.MakefileBuilder):
                 raise InstallError("Unsupported C/C++/Fortran compiler combination")
         elif self.pkg.compiler.name == "nag":
             env.set("ESMF_COMPILER", "nag")
-        elif self.pkg.compiler.name == "pgi":
-            env.set("ESMF_COMPILER", "pgi")
         elif self.pkg.compiler.name == "nvhpc":
             env.set("ESMF_COMPILER", "nvhpc")
         elif self.pkg.compiler.name == "cce":

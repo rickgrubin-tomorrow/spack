@@ -1,5 +1,4 @@
-# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
@@ -36,4 +35,4 @@ class PyKiwisolver(PythonPackage):
 
     # https://github.com/spack/spack/issues/28522
     # https://github.com/nucleic/kiwi/issues/126
-    patch("macos-gcc.patch", when="@:1.3.2 %gcc platform=darwin")
+    patch("macos-gcc.patch", when="@:1.3.2 platform=darwin %gcc")

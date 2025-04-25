@@ -1,7 +1,7 @@
-# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
+import spack.build_systems.cmake
 from spack.build_systems.python import PythonPipBuilder
 from spack.package import *
 
@@ -57,7 +57,7 @@ class PyPennylaneLightningKokkos(CMakePackage, PythonExtension, CudaPackage, ROC
     for val in CudaPackage.cuda_arch_values:
         depends_on("kokkos cuda_arch={0}".format(val), when="cuda_arch={0}".format(val))
     # Use +wrapper when not %clang %cce
-    depends_on("kokkos+wrapper", when="%gcc+cuda")
+    depends_on("kokkos+wrapper", when="+cuda %gcc")
 
     # ROCm
     for val in ROCmPackage.amdgpu_targets:

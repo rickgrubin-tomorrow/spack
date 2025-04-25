@@ -1,5 +1,4 @@
-# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
@@ -36,6 +35,7 @@ class Grads(AutotoolsPackage):
     depends_on('hdf', when='+hdf4')
     """
     variant("dap", default=False, description="Enable DAP support")
+
     # TODO: This variant depends on the "simple X" library, which is no longer available
     # from any trusted source. Revisit if this changes.
     # variant("gui", default=False, description="Enable graphical user interface")
@@ -46,12 +46,13 @@ class Grads(AutotoolsPackage):
     variant("hdf4", default=True, when="@2.2.2:", description="Enable HDF4 support")
     variant("netcdf", default=True, when="@2.2.2:", description="Enable NetCDF support")
 
-    depends_on("hdf5@:1.10", when="+hdf5")
+    depends_on("hdf5", when="+hdf5")
     depends_on("hdf", when="+hdf4")
+    depends_on("hdf5", when="+netcdf")
     depends_on("netcdf-c", when="+netcdf")
+    depends_on("g2c+pic", when="+grib2")
     depends_on("libgeotiff", when="+geotiff")
     depends_on("shapelib", when="+shapefile")
-    depends_on("g2c+pic", when="+grib2")
     depends_on("gadap", when="+dap")
     depends_on("udunits")
     depends_on("libgd")
@@ -59,21 +60,9 @@ class Grads(AutotoolsPackage):
     depends_on("cairo +X +pdf +fc +ft")
     depends_on("readline")
     depends_on("pkgconfig", type="build")
-    depends_on("netcdf-c", when="+netcdf")
-    depends_on("hdf5", when="+netcdf")
 
     # Grads does not supply #include <stdint.h> which Intel complains about
     patch("stdint.patch")
-
-    # -lgrib2c is -lg2c
-    # and no reason to hardcode PNG version
-    def patch(self):
-        if self.spec.satisfies("@:2.2.2"):
-            filter_file("-lpng15", "-lpng", "configure")
-        if self.spec.satisfies("+grib2"):
-            filter_file("-lgrib2c", "-lg2c", "configure")
-            if self.spec.satisfies("^g2c@1.8.0:"):
-                filter_file("G2_VERSION", "G2C_VERSION", "src/gacfg.c")
 
     # The project is hosted on GitHub for versions 2.2.2 and later
     def url_for_version(self, version):
@@ -83,6 +72,26 @@ class Grads(AutotoolsPackage):
         else:
             url = "ftp://cola.gmu.edu/grads/{}/grads-{}-src.tar.gz"
             return url.format(version.up_to(2), version)
+
+    def patch(self):
+        if self.spec.satisfies("@:2.2.2"):
+            filter_file("png15", "png", "configure")
+
+        # Name of grib2 C library has changed in recent versions
+        if self.spec.satisfies("+grib2"):
+            filter_file("grib2c", "g2c", "configure")
+            if self.spec.satisfies("^g2c@1.8.0:"):
+                filter_file("G2_VERSION", "G2C_VERSION", "src/gacfg.c")
+
+    def flag_handler(self, name, flags):
+        spec = self.spec
+
+        if name == "cflags":
+            # Can use newer versions of HDF5, but 1.10 is the last API GrADS supports
+            if "hdf5" in spec and spec["hdf5"].satisfies("@1.12:"):
+                flags.append("-DH5_USE_110_API")
+
+        return (flags, None, None)
 
     def setup_build_environment(self, env):
         spec = self.spec
