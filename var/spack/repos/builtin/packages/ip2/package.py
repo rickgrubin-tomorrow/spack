@@ -38,3 +38,7 @@ class Ip2(CMakePackage):
             )
             env.set("IP2_LIB" + suffix, lib[0])
             env.set("IP2_INC" + suffix, join_path(self.prefix, "include_" + suffix))
+
+    def patch(self):
+        filter_file("\(Intel\|", "(Intel|IntelLLVM|", "CMakeLists.txt")
+        filter_file("\(Intel\)", "(Intel|IntelLLVM)", "src/CMakeLists.txt")
