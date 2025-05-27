@@ -81,7 +81,15 @@ class Fckit(CMakePackage):
             raise InstallError("C++ library not configured for compiler")
         args.append("-DECBUILD_CXX_IMPLICIT_LINK_LIBRARIES={}".format(cxxlib))
 
+        if 'gcc-runtime' in self.spec:
+            args.append("-DCMAKE_Fortran_FLAGS=-L%s" % self.spec["gcc-runtime"].prefix.lib)
+            args.append("-DCMAKE_CXX_FLAGS=-L%s" % self.spec["gcc-runtime"].prefix.lib)
+
         return args
+
+    def setup_build_environment(self, env):
+        if 'gcc-runtime' in self.spec:
+            env.set("LDFLAGS", "-L%s" % self.spec["gcc-runtime"].prefix.lib)
 
     @when("+fismahigh")
     def patch(self):
