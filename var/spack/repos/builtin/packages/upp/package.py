@@ -79,5 +79,5 @@ class Upp(CMakePackage):
         return args
 
     def patch(self):
-        filter_file("\(Intel\)", "(Intel|IntelLLVM)", "CMakeLists.txt")
-        filter_file("\(Intel\)", "(Intel|IntelLLVM)", "sorc/ncep_post.fd/CMakeLists.txt")
+        filter_file(r"\(Intel\)", "(Intel|IntelLLVM)", "CMakeLists.txt")
+        filter_file(r"\(Intel\)", "(Intel|IntelLLVM)", "sorc/ncep_post.fd/CMakeLists.txt")
