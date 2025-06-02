@@ -197,6 +197,10 @@ class Eckit(CMakePackage):
             # of a dependent package (e.g. fdb) might fail due to the undefined references.
             args.append(self.define("CURSES_NEED_NCURSES", True))
 
+        if "gcc-runtime" in self.spec:
+            args.append("-DCMAKE_Fortran_FLAGS=-L%s" % self.spec["gcc-runtime"].prefix.lib)
+            args.append("-DCMAKE_CXX_FLAGS=-L%s" % self.spec["gcc-runtime"].prefix.lib)
+
         return args
 
     def setup_build_environment(self, env):
@@ -206,6 +210,9 @@ class Eckit(CMakePackage):
         # when the admin variant is enabled.
         if self.spec.satisfies("platform=darwin") and self.spec.satisfies("+admin"):
             env.append_flags("LDFLAGS", self.spec["ncurses"].libs.ld_flags)
+
+        if "gcc-runtime" in self.spec:
+            env.append_flags("LDFLAGS", "-L%s" % self.spec["gcc-runtime"].prefix.lib)
 
     def check(self):
         ctest_args = ["-j", str(make_jobs)]

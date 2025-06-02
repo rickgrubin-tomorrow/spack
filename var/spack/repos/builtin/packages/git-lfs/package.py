@@ -63,6 +63,11 @@ class GitLfs(MakefilePackage):
         match = re.search(r"git-lfs/(\S+)", output)
         return match.group(1) if match else None
 
+    def build(self, spec, prefix):
+        tmpdir = join_path(self.build_directory, "tmp")
+        mkdirp(tmpdir)
+        make(f"TMPDIR={tmpdir}", "-j1")
+
     # Git-lfs does not provide an 'install' target in the Makefile
     def install(self, spec, prefix):
         mkdirp(prefix.bin)
