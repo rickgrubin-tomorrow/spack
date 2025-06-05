@@ -86,6 +86,9 @@ class Scotch(CMakePackage, MakefilePackage):
     conflicts("metis", when="+metis")
     conflicts("parmetis", when="+metis")
 
+    # ISSUE HERE
+    conflicts("@oneapi")
+
     parallel = False
 
     # NOTE: Versions of Scotch up to version 6.0.0 don't include support for
