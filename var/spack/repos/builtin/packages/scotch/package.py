@@ -87,7 +87,7 @@ class Scotch(CMakePackage, MakefilePackage):
     conflicts("parmetis", when="+metis")
 
     # https://github.com/ufs-community/ufs-weather-model/pull/2650
-    # replace with spack-package issue once created
+    # https://github.com/spack/spack-packages/issues/161
     conflicts("@oneapi")
 
     parallel = False
