@@ -38,6 +38,7 @@ class Mapl(CMakePackage):
     version("develop", branch="develop")
     version("main", branch="main")
 
+    version("2.53.4", sha256="da38348a72fcbaa2b888578bfa630ab36261206136d33700344ed6792f9f9aeb")
     version("2.53.0", sha256="68c24e6c0e3340645b1fb685972c96ef80746d5a289572c9883e520680708ebe")
     version("2.52.0", sha256="c30be3a6ed3fca40aea903e10ee51e2fb50b4ef2445fdc959d4871baf3c20585")
     version("2.51.2", sha256="f6df2be24d0c113af3d0424b674d970621660bf11e59a699373f014a14d0716e")
@@ -166,60 +167,70 @@ class Mapl(CMakePackage):
         name="esma_cmake",
         git="https://github.com/GEOS-ESM/ESMA_cmake.git",
         tag="v3.55.0",
+        commit="ee49277f13b9b223cd86129a0c7094a359cbc4db",
         when="@2.51:",
     )
     resource(
         name="esma_cmake",
         git="https://github.com/GEOS-ESM/ESMA_cmake.git",
         tag="v3.51.0",
+        commit="53fae1237c88f9a6e60393dc6e4781555786b659",
         when="@2.48:2.50",
     )
     resource(
         name="esma_cmake",
         git="https://github.com/GEOS-ESM/ESMA_cmake.git",
         tag="v3.46.0",
+        commit="00bfd6ce4d7d8152433b2b1ad2cbb6d6f6c7066a",
         when="@2.47",
     )
     resource(
         name="esma_cmake",
         git="https://github.com/GEOS-ESM/ESMA_cmake.git",
         tag="v3.45.2",
+        commit="0f40e433189902d30af15fc92ace18dbf950d273",
         when="@2.45:2.46",
     )
     resource(
         name="esma_cmake",
         git="https://github.com/GEOS-ESM/ESMA_cmake.git",
         tag="v3.40.0",
+        commit="92e9910b1f70d6ea75e9f552fd672001b740b15b",
         when="@2.44",
     )
     resource(
         name="esma_cmake",
         git="https://github.com/GEOS-ESM/ESMA_cmake.git",
         tag="v3.36.0",
+        commit="e69296a5955ccc08618673125fccda0d0ca979ea",
         when="@2.42.0:2.43",
     )
     resource(
         name="esma_cmake",
         git="https://github.com/GEOS-ESM/ESMA_cmake.git",
         tag="v3.31.0",
+        commit="7dc4c819dc5169e6b887374aa0fa0a8f71846832",
         when="@2.40.0:2.41",
     )
     resource(
         name="esma_cmake",
         git="https://github.com/GEOS-ESM/ESMA_cmake.git",
         tag="v3.28.0",
+        commit="cb919eaea9489a2852d830a1eebf45b3c6acd223",
         when="@2.36.0:2.39",
     )
     resource(
         name="esma_cmake",
         git="https://github.com/GEOS-ESM/ESMA_cmake.git",
         tag="v3.24.0",
+        commit="5664d95fddff4afd01a2d7388a8bd99123d65e7d",
         when="@2.34.0:2.35",
     )
     resource(
         name="esma_cmake",
         git="https://github.com/GEOS-ESM/ESMA_cmake.git",
         tag="v3.21.0",
+        commit="6df72eb873659eb55bc119f320a6e6e7bd23f5b1",
         when="@2.22.0:2.33",
     )
     # NOTE: Remove this resource(), the patch() commands below
@@ -228,6 +239,7 @@ class Mapl(CMakePackage):
         name="esma_cmake",
         git="https://github.com/GEOS-ESM/ESMA_cmake.git",
         tag="v3.13.0",
+        commit="e24f465000723630b4aef47d1d62cda5c0b38217",
         when="@:2.12.3",
     )
 
