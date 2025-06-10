@@ -88,7 +88,7 @@ class Scotch(CMakePackage, MakefilePackage):
 
     # https://github.com/ufs-community/ufs-weather-model/pull/2650
     # https://github.com/spack/spack-packages/issues/161
-    conflicts("@oneapi")
+    conflicts("%oneapi")
 
     parallel = False
 
