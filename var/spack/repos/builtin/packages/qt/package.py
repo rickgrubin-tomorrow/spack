@@ -636,6 +636,8 @@ class Qt(Package):
             use_spack_dep("freetype")
             if spec.satisfies("platform=linux") or spec.satisfies("platform=freebsd"):
                 config_args.append("-fontconfig")
+            # Explicitly disable vulkan to avoid build-time bug; this could be a variant
+            config_args.append("-no-vulkan")
         else:
             config_args.append("-no-freetype")
             config_args.append("-no-gui")
@@ -815,8 +817,7 @@ class Qt(Package):
             config_args.extend(["-skip", "wayland"])
 
         if "~location" in spec:
-            if version >= Version("5.15"):
-                config_args.extend(["-skip", "qtlocation"])
+            config_args.extend(["-skip", "qtlocation"])
 
         if IS_WINDOWS:
             config_args.extend(["-skip", "qtspeech"])

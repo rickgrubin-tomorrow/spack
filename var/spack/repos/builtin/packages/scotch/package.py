@@ -19,6 +19,7 @@ class Scotch(CMakePackage, MakefilePackage):
 
     maintainers("pghysels")
 
+    version("7.0.7", sha256="02084471d2ca525f8a59b4bb8c607eb5cca452d6a38cf5c89f5f92f7edc1a5b5")
     version("7.0.6", sha256="b44acd0d2f53de4b578fa3a88944cccc45c4d2961cd8cefa9b9a1d5431de8e2b")
     version("7.0.4", sha256="8ef4719d6a3356e9c4ca7fefd7e2ac40deb69779a5c116f44da75d13b3d2c2c3")
     version("7.0.3", sha256="5b5351f0ffd6fcae9ae7eafeccaa5a25602845b9ffd1afb104db932dd4d4f3c5")
@@ -85,6 +86,10 @@ class Scotch(CMakePackage, MakefilePackage):
     # installations
     conflicts("metis", when="+metis")
     conflicts("parmetis", when="+metis")
+
+    # https://github.com/ufs-community/ufs-weather-model/pull/2650
+    # https://github.com/spack/spack-packages/issues/161
+    conflicts("%oneapi")
 
     parallel = False
 
