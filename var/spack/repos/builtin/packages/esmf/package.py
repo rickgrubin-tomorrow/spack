@@ -31,7 +31,10 @@ class Esmf(MakefilePackage, PythonExtension):
     # Develop is a special name for spack and is always considered the newest version
     version("develop", branch="develop")
     # generate chksum with 'spack checksum esmf@x.y.z'
+    version("8.9.0b09", commit="7e8c4b2f21bbea6432a3dadd6e6a7e143b786193")
+    version("8.9.0b08", commit="56e26fde7b4890ae44eb3efdf2f6728b5eb4627e")
     version("8.9.0b05", commit="5df19ab277b4517a093af0510f08171c478ec627")
+    version("8.8.1", sha256="b0acb59d4f000bfbdfddc121a24819bd2a50997c7b257b0db2ceb96f3111b173")
     version("8.8.0", sha256="f89327428aeef6ad34660b5b78f30d1c55ec67efb8f7df1991fdaa6b1eb3a27c")
     version("8.7.0", sha256="d7ab266e2af8c8b230721d4df59e61aa03c612a95cc39c07a2d5695746f21f56")
     version("8.6.1", sha256="dc270dcba1c0b317f5c9c6a32ab334cb79468dda283d1e395d98ed2a22866364")
@@ -72,10 +75,6 @@ class Esmf(MakefilePackage, PythonExtension):
     # For module hierarchy (JCSDA repo only):
     provides("esmf_virtual")
 
-    depends_on("c", type="build")  # generated
-    depends_on("cxx", type="build")  # generated
-    depends_on("fortran", type="build")  # generated
-
     variant("mpi", default=True, description="Build with MPI support")
     variant("external-lapack", default=False, description="Build with external LAPACK library")
     variant("netcdf", default=True, description="Build with NetCDF support")
@@ -107,6 +106,10 @@ class Esmf(MakefilePackage, PythonExtension):
     # The way python is handled here is only avialable >=8.4.0
     # https://github.com/esmf-org/esmf/releases/tag/v8.4.0
     variant("python", default=False, description="Build python bindings", when="@8.4.0:")
+
+    depends_on("c", type="build")  # generated
+    depends_on("cxx", type="build")  # generated
+    depends_on("fortran", type="build")  # generated
 
     # Optional dependencies
     depends_on("mpi", when="+mpi")
@@ -142,23 +145,13 @@ class Esmf(MakefilePackage, PythonExtension):
 
     conflicts("%aocc", when="@:8.3")
 
-    # Make esmf build with newer intel versions
-    patch("intel.patch", when="@:7.0 %intel@17:")
-    # Make esmf build with newer gcc versions
-    # https://sourceforge.net/p/esmf/esmf/ci/3706bf758012daebadef83d6575c477aeff9c89b/
-    patch("gcc.patch", when="@:7.0 %gcc@6:")
-
-    # Fix undefined reference errors with mvapich2
-    # https://sourceforge.net/p/esmf/esmf/ci/34de0ccf556ba75d35c9687dae5d9f666a1b2a18/
-    patch("mvapich2.patch", when="@:7.0")
+    # Fix esmf@8.9.0b08 with llvm@20
+    # https://github.com/esmf-org/esmf/issues/411
+    patch("esmf890b08llvm20.patch", when="@8.9.0b08 %clang@20")
 
     # explicit type cast of variables from long to int
     patch("longtoint.patch", when="@:8.3.2 %cce@14:")
     patch("longtoint.patch", when="@:8.3.2 %oneapi@2022:")
-
-    # Allow different directories for creation and
-    # installation of dynamic libraries on OSX:
-    patch("darwin_dylib_install_name.patch", when="platform=darwin @:7.0")
 
     # Missing include file for newer gcc compilers
     # https://trac.macports.org/ticket/57493
@@ -179,7 +172,7 @@ class Esmf(MakefilePackage, PythonExtension):
             os.path.join("src/addon/esmpy/pyproject.toml"),
         )
 
-    def setup_run_environment(self, env):
+    def setup_run_environment(self, env: EnvironmentModifications) -> None:
         env.set("ESMFMKFILE", os.path.join(self.prefix.lib, "esmf.mk"))
 
 
@@ -199,13 +192,6 @@ class MakefileBuilder(spack.build_systems.makefile.MakefileBuilder):
     # below sets the compilers to the MPI wrappers.
     filter_compiler_wrappers("esmf.mk", relative_root="lib")
 
-    # Make script from mvapich2.patch executable
-    @when("@:7.0")
-    @run_before("build")
-    def chmod_scripts(self):
-        chmod = which("chmod")
-        chmod("+x", "scripts/libs.mvapich2f90")
-
     def url_for_version(self, version):
         if version < Version("8.0.0"):
             # Older ESMF releases had a custom tag format ESMF_x_y_z
@@ -218,7 +204,7 @@ class MakefileBuilder(spack.build_systems.makefile.MakefileBuilder):
                 version.dotted
             )
 
-    def setup_build_environment(self, env):
+    def setup_build_environment(self, env: EnvironmentModifications) -> None:
         spec = self.spec
         # Installation instructions can be found at:
         # http://www.earthsystemmodeling.org/esmf_releases/last_built/ESMF_usrdoc/node9.html
@@ -364,11 +350,7 @@ class MakefileBuilder(spack.build_systems.makefile.MakefileBuilder):
                 "^[virtuals=mpi] hpcx-mpi"
             ):
                 env.set("ESMF_COMM", "openmpi")
-            elif (
-                spec.satisfies("^[virtuals=mpi] intel-parallel-studio+mpi")
-                or spec.satisfies("^[virtuals=mpi] intel-mpi")
-                or spec.satisfies("^[virtuals=mpi] intel-oneapi-mpi")
-            ):
+            elif spec.satisfies("^[virtuals=mpi] intel-oneapi-mpi"):
                 env.set("ESMF_COMM", "intelmpi")
             elif spec.satisfies("^[virtuals=mpi] mpt"):
                 # MPT is the HPE (SGI) variant of mpich
@@ -412,7 +394,7 @@ class MakefileBuilder(spack.build_systems.makefile.MakefileBuilder):
             env.set("ESMF_NFCONFIG", "nf-config")
             netcdfc = spec["netcdf-c"]
             if netcdfc.satisfies("~shared"):
-                nc_config = which(os.path.join(netcdfc.prefix.bin, "nc-config"))
+                nc_config = which(os.path.join(netcdfc.prefix.bin, "nc-config"), required=True)
                 nc_flags = nc_config("--static", "--libs", output=str).strip()
                 env.set("ESMF_NETCDF_LIBS", nc_flags)
 
@@ -485,7 +467,9 @@ class MakefileBuilder(spack.build_systems.makefile.MakefileBuilder):
     def check(self):
         make("check", parallel=False)
 
-    def setup_dependent_build_environment(self, env, dependent_spec):
+    def setup_dependent_build_environment(
+        self, env: EnvironmentModifications, dependent_spec: Spec
+    ) -> None:
         env.set("ESMFMKFILE", os.path.join(self.prefix.lib, "esmf.mk"))
 
     def install(self, pkg, spec, prefix):
