@@ -11,8 +11,8 @@
 #   ~/.spack/repos.yaml
 # -------------------------------------------------------------------------
 repos:
-  - /backup/rgrubin/git/spack-stack/spack-ext/repos/NWP-DA-bundles
-  - /backup/rgrubin/git/spack-stack/spack-ext/repos/NWP-DA
-  - /backup/rgrubin/git/spack-stack/spack-ext/repos/CBAM
-  - /backup/rgrubin/git/spack-stack/spack-ext/repos/spack-stack
+  - $spack/spack-ext/repos/NWP-DA-bundles
+  - $spack/spack-ext/repos/NWP-DA
+  - $spack/spack-ext/repos/CBAM
+  - $spack/spack-ext/repos/spack-stack
   - $spack/var/spack/repos/builtin
